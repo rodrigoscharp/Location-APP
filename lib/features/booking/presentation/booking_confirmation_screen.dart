@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacings.dart';
@@ -18,95 +19,115 @@ class BookingConfirmationScreen extends ConsumerWidget {
     final bookingAsync = ref.watch(bookingDetailProvider(bookingId));
 
     return Scaffold(
+      backgroundColor: AppColors.paleGray,
       body: bookingAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.coral),
-        ),
-        error: (_, __) => const Center(child: Text('Erro ao carregar reserva')),
+        loading: () =>
+            const Center(child: CircularProgressIndicator(color: AppColors.coral)),
+        error: (_, __) =>
+            const Center(child: Text('Erro ao carregar reserva')),
         data: (booking) => SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacings.base),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Success icon
+                const Spacer(),
+
+                // Success illustration
                 Container(
-                  width: 100,
-                  height: 100,
+                  width: 110,
+                  height: 110,
                   decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.1),
+                    color: AppColors.success.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.check_circle_rounded,
                     color: AppColors.success,
-                    size: 64,
+                    size: 68,
                   ),
                 ),
                 const SizedBox(height: AppSpacings.lg),
-                const Text(
+                Text(
                   'Reserva confirmada!',
-                  style: TextStyle(
+                  style: GoogleFonts.dmSans(
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
                     color: AppColors.charcoal,
                   ),
                 ),
-                const SizedBox(height: AppSpacings.sm),
-                const Text(
+                const SizedBox(height: 8),
+                Text(
                   'Sua hospedagem foi reservada com sucesso.\nBoa viagem a Ubatuba!',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.warmGray, height: 1.5),
+                  style: GoogleFonts.dmSans(
+                    color: AppColors.warmGray,
+                    height: 1.5,
+                    fontSize: 15,
+                  ),
                 ),
                 const SizedBox(height: AppSpacings.xl),
 
                 // Booking details card
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(AppSpacings.base),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppColors.sand,
-                    borderRadius: BorderRadius.circular(16),
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.black.withValues(alpha: 0.06),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
                       _DetailRow(
                         icon: Icons.calendar_today_outlined,
                         label: 'Check-in',
-                        value: DateFormat('dd/MM/yyyy').format(booking.checkIn),
+                        value:
+                            DateFormat('dd/MM/yyyy').format(booking.checkIn),
                       ),
-                      const SizedBox(height: 12),
+                      const _Divider(),
                       _DetailRow(
                         icon: Icons.calendar_month_outlined,
                         label: 'Check-out',
-                        value: DateFormat('dd/MM/yyyy').format(booking.checkOut),
+                        value:
+                            DateFormat('dd/MM/yyyy').format(booking.checkOut),
                       ),
-                      const SizedBox(height: 12),
+                      const _Divider(),
                       _DetailRow(
                         icon: Icons.person_outline,
                         label: 'Hóspedes',
                         value: '${booking.guestsCount}',
                       ),
-                      const SizedBox(height: 12),
+                      const _Divider(),
                       _DetailRow(
                         icon: Icons.payments_outlined,
                         label: 'Total pago',
                         value: CurrencyFormatter.formatDecimal(booking.totalPrice),
+                        valueColor: AppColors.coral,
+                        bold: true,
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: AppSpacings.xl),
+
+                const Spacer(),
+
                 AppButton(
                   label: 'Explorar mais hospedagens',
                   onPressed: () => context.go(Routes.explore),
                 ),
-                const SizedBox(height: AppSpacings.base),
+                const SizedBox(height: AppSpacings.sm),
                 AppButton(
                   label: 'Minhas reservas',
                   outlined: true,
                   onPressed: () => context.go(Routes.profile),
                 ),
+                const SizedBox(height: AppSpacings.xl),
               ],
             ),
           ),
@@ -116,27 +137,59 @@ class BookingConfirmationScreen extends ConsumerWidget {
   }
 }
 
+class _Divider extends StatelessWidget {
+  const _Divider();
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 10),
+      child: Divider(height: 1, color: AppColors.lightGray),
+    );
+  }
+}
+
 class _DetailRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+  final Color? valueColor;
+  final bool bold;
 
   const _DetailRow({
     required this.icon,
     required this.label,
     required this.value,
+    this.valueColor,
+    this.bold = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: AppColors.coral),
-        const SizedBox(width: 10),
-        Text(label, style: const TextStyle(color: AppColors.warmGray)),
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: AppColors.coral.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 17, color: AppColors.coral),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          label,
+          style: GoogleFonts.dmSans(color: AppColors.warmGray, fontSize: 14),
+        ),
         const Spacer(),
-        Text(value,
-            style: const TextStyle(fontWeight: FontWeight.w600)),
+        Text(
+          value,
+          style: GoogleFonts.dmSans(
+            fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
+            fontSize: 14,
+            color: valueColor ?? AppColors.charcoal,
+          ),
+        ),
       ],
     );
   }

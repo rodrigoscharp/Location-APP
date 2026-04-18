@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../favorites/presentation/widgets/heart_button.dart';
@@ -26,61 +27,128 @@ class ListingCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image with Hero + heart button
+          // ── Imagem ──────────────────────────────────────────
           Stack(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Hero(
-                  tag: 'listing-img-${listing.id}',
+              // Foto principal
+              Hero(
+                tag: 'listing-img-${listing.id}',
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
                   child: CachedNetworkImage(
                     imageUrl: listing.coverPhoto,
-                    height: 220,
+                    height: 265,
                     width: double.infinity,
                     fit: BoxFit.cover,
                     placeholder: (_, __) => Container(
-                      height: 220,
-                      color: AppColors.lightGray,
+                      height: 265,
+                      decoration: BoxDecoration(
+                        color: AppColors.lightGray,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                     errorWidget: (_, __, ___) => Container(
-                      height: 220,
-                      color: AppColors.lightGray,
-                      child: const Icon(Icons.image_not_supported_outlined,
-                          color: AppColors.warmGray, size: 40),
+                      height: 265,
+                      color: AppColors.paleGray,
+                      child: const Icon(Icons.image_outlined,
+                          color: AppColors.mediumGray, size: 48),
                     ),
                   ),
                 ),
               ),
-              // Region badge
+
+              // Gradiente inferior
+              Positioned(
+                bottom: 0, left: 0, right: 0,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(20)),
+                  child: Container(
+                    height: 110,
+                    decoration: const BoxDecoration(
+                      gradient: AppColors.gradientImage,
+                    ),
+                  ),
+                ),
+              ),
+
+              // Badge de preço — sobre a imagem
+              Positioned(
+                bottom: 14,
+                left: 14,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.black.withValues(alpha: 0.15),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: CurrencyFormatter.format(
+                              listing.pricePerNight),
+                          style: GoogleFonts.dmSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.charcoal,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '/noite',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 12,
+                            color: AppColors.warmGray,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Botão de favorito
+              Positioned(
+                top: 12,
+                right: 12,
+                child: HeartButton(listingId: listing.id),
+              ),
+
+              // Badge de tipo
               Positioned(
                 top: 12,
                 left: 12,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.92),
+                    color: AppColors.black.withValues(alpha: 0.45),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '${listing.region.emoji} ${listing.region.label}',
-                    style: const TextStyle(
+                    listing.type.label,
+                    style: GoogleFonts.dmSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.charcoal,
+                      color: AppColors.white,
                     ),
                   ),
                 ),
               ),
-              // Heart button
-              Positioned(
-                top: 10,
-                right: 10,
-                child: HeartButton(listingId: listing.id),
-              ),
             ],
           ),
-          const SizedBox(height: 10),
-          // Info row
+
+          const SizedBox(height: 12),
+
+          // ── Info ────────────────────────────────────────────
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -90,9 +158,9 @@ class ListingCard extends StatelessWidget {
                   children: [
                     Text(
                       listing.title,
-                      style: const TextStyle(
+                      style: GoogleFonts.dmSans(
                         fontSize: 15,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.charcoal,
                       ),
                       maxLines: 1,
@@ -100,8 +168,8 @@ class ListingCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      listing.type.label,
-                      style: const TextStyle(
+                      '${listing.region.emoji} ${listing.region.label}',
+                      style: GoogleFonts.dmSans(
                         fontSize: 13,
                         color: AppColors.warmGray,
                       ),
@@ -109,39 +177,21 @@ class ListingCard extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               RatingStars(
                 rating: listing.avgRating,
                 reviewCount: listing.reviewCount,
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: CurrencyFormatter.format(listing.pricePerNight),
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.charcoal,
-                  ),
-                ),
-                const TextSpan(
-                  text: ' /noite',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.warmGray,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       )
           .animate()
-          .fadeIn(delay: (animationIndex * 60).ms, duration: 350.ms)
-          .slideY(begin: 0.15, end: 0),
+          .fadeIn(
+            delay: Duration(milliseconds: animationIndex * 50),
+            duration: const Duration(milliseconds: 400),
+          )
+          .slideY(begin: 0.08, end: 0),
     );
   }
 }

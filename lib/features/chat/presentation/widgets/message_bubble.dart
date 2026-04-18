@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/message.dart';
@@ -28,31 +29,39 @@ class MessageBubble extends StatelessWidget {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isMine ? AppColors.coral : const Color(0xFFF0F0F0),
+          color: isMine ? AppColors.coral : AppColors.white,
           borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(isMine ? 16 : 4),
-            bottomRight: Radius.circular(isMine ? 4 : 16),
+            topLeft: const Radius.circular(18),
+            topRight: const Radius.circular(18),
+            bottomLeft: Radius.circular(isMine ? 18 : 4),
+            bottomRight: Radius.circular(isMine ? 4 : 18),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withValues(alpha: 0.06),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
               message.content,
-              style: TextStyle(
+              style: GoogleFonts.dmSans(
                 color: isMine ? AppColors.white : AppColors.charcoal,
                 fontSize: 15,
+                height: 1.4,
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 3),
             Text(
               DateFormat('HH:mm').format(message.createdAt.toLocal()),
-              style: TextStyle(
+              style: GoogleFonts.dmSans(
                 fontSize: 10,
                 color: isMine
-                    ? AppColors.white.withOpacity(0.7)
+                    ? AppColors.white.withValues(alpha: 0.7)
                     : AppColors.warmGray,
               ),
             ),

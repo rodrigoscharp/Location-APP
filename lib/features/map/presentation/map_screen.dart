@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/currency_formatter.dart';
@@ -20,8 +21,6 @@ class MapScreen extends ConsumerStatefulWidget {
 }
 
 class _MapScreenState extends ConsumerState<MapScreen> {
-  GoogleMapController? _mapCtrl;
-
   Set<Marker> _buildMarkers(List<Listing> listings) {
     return listings.where((l) => l.lat != null && l.lng != null).map((l) {
       return Marker(
@@ -45,7 +44,20 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mapa', style: TextStyle(fontWeight: FontWeight.w700)),
+        backgroundColor: AppColors.white,
+        elevation: 0,
+        title: Text(
+          'Mapa',
+          style: GoogleFonts.dmSans(
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+            color: AppColors.charcoal,
+          ),
+        ),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(height: 1, color: AppColors.lightGray),
+        ),
       ),
       body: listingsAsync.when(
         loading: () => const Center(
@@ -60,7 +72,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 zoom: 12,
               ),
               markers: _buildMarkers(listings),
-              onMapCreated: (ctrl) => _mapCtrl = ctrl,
+              onMapCreated: (_) {},
               onTap: (_) =>
                   ref.read(selectedMapListingProvider.notifier).state = null,
               myLocationButtonEnabled: true,

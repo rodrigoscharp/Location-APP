@@ -7,14 +7,14 @@ class LoadingShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.lightGray,
-      highlightColor: AppColors.white,
-      child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: 5,
-        separatorBuilder: (_, __) => const SizedBox(height: 16),
-        itemBuilder: (_, __) => const _ShimmerCard(),
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+      itemCount: 4,
+      separatorBuilder: (_, __) => const SizedBox(height: 28),
+      itemBuilder: (_, __) => Shimmer.fromColors(
+        baseColor: AppColors.lightGray,
+        highlightColor: const Color(0xFFF0F0F0),
+        child: const _ShimmerCard(),
       ),
     );
   }
@@ -28,47 +28,35 @@ class _ShimmerCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Image placeholder
         Container(
-          height: 220,
+          height: 265,
           decoration: BoxDecoration(
             color: AppColors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
           ),
         ),
-        const SizedBox(height: 10),
-        Container(height: 16, width: 200, color: AppColors.white, decoration: BoxDecoration(borderRadius: BorderRadius.circular(4))),
-        const SizedBox(height: 6),
-        Container(height: 12, width: 120, color: AppColors.white, decoration: BoxDecoration(borderRadius: BorderRadius.circular(4))),
-      ],
-    );
-  }
-}
-
-class ShimmerBox extends StatelessWidget {
-  final double width;
-  final double height;
-  final double radius;
-
-  const ShimmerBox({
-    super.key,
-    required this.width,
-    required this.height,
-    this.radius = 8,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.lightGray,
-      highlightColor: AppColors.white,
-      child: Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(radius),
+        const SizedBox(height: 12),
+        // Title placeholder
+        Container(
+          height: 16,
+          width: 220,
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(6),
+          ),
         ),
-      ),
+        const SizedBox(height: 8),
+        // Subtitle placeholder
+        Container(
+          height: 12,
+          width: 140,
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+      ],
     );
   }
 }

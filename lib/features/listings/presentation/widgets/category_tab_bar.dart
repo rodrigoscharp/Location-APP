@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/listing.dart';
 
@@ -15,36 +16,48 @@ class CategoryTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 52,
+      height: 48,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         children: [
-          _CategoryChip(
-            label: 'Todos',
+          _Chip(
+            label: 'Tudo',
             emoji: '🌴',
             selected: selected == null,
             onTap: () => onSelected(null),
           ),
-          ...ListingRegion.values.map((region) => _CategoryChip(
-                label: region.label,
-                emoji: region.emoji,
-                selected: selected == region,
-                onTap: () => onSelected(region),
-              )),
+          _Chip(
+            label: 'Praia',
+            emoji: '🏖️',
+            selected: selected == ListingRegion.praia,
+            onTap: () => onSelected(ListingRegion.praia),
+          ),
+          _Chip(
+            label: 'Centro',
+            emoji: '🏙️',
+            selected: selected == ListingRegion.centro,
+            onTap: () => onSelected(ListingRegion.centro),
+          ),
+          _Chip(
+            label: 'Serra',
+            emoji: '⛰️',
+            selected: selected == ListingRegion.montanha,
+            onTap: () => onSelected(ListingRegion.montanha),
+          ),
         ],
       ),
     );
   }
 }
 
-class _CategoryChip extends StatelessWidget {
+class _Chip extends StatelessWidget {
   final String label;
   final String emoji;
   final bool selected;
   final VoidCallback onTap;
 
-  const _CategoryChip({
+  const _Chip({
     required this.label,
     required this.emoji,
     required this.selected,
@@ -58,25 +71,35 @@ class _CategoryChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? AppColors.coral : AppColors.white,
-          borderRadius: BorderRadius.circular(20),
+          color: selected ? AppColors.charcoal : AppColors.white,
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: selected ? AppColors.coral : AppColors.lightGray,
+            color: selected ? AppColors.charcoal : AppColors.lightGray,
+            width: selected ? 0 : 1,
           ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: AppColors.charcoal.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  )
+                ]
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(emoji, style: const TextStyle(fontSize: 14)),
-            const SizedBox(width: 4),
+            const SizedBox(width: 6),
             Text(
               label,
-              style: TextStyle(
+              style: GoogleFonts.dmSans(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: selected ? AppColors.white : AppColors.charcoal,
+                color: selected ? AppColors.white : AppColors.darkGray,
               ),
             ),
           ],

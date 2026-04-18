@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacings.dart';
 import '../../../shared/widgets/empty_state_widget.dart';
 import '../../../shared/widgets/error_state_widget.dart';
 import '../../../shared/widgets/loading_shimmer.dart';
+import '../../auth/presentation/auth_provider.dart';
 import '../../listings/domain/listing.dart';
 import '../../listings/domain/listing_filter.dart';
 import 'listings_provider.dart';
@@ -60,12 +62,7 @@ class _ListingsScreenState extends ConsumerState<ListingsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: const FilterBottomSheet(),
-      ),
+      builder: (_) => const FilterBottomSheet(),
     );
   }
 
@@ -73,126 +70,202 @@ class _ListingsScreenState extends ConsumerState<ListingsScreen> {
   Widget build(BuildContext context) {
     final listingsAsync = ref.watch(listingsProvider);
     final filter = ref.watch(listingFilterProvider);
+    final user = ref.watch(currentUserProvider);
 
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // App bar
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                  AppSpacings.base, AppSpacings.base, AppSpacings.base, 0),
+      body: Column(
+        children: [
+          // ── Header com gradiente ─────────────────────────────
+          _Header(user: user, onFilterTap: _showFilters, hasFilter: filter.hasActiveFilters),
+
+          // ── Category chips ───────────────────────────────────
+          const SizedBox(height: 4),
+          CategoryTabBar(selected: _region, onSelected: _setRegion),
+          const SizedBox(height: 4),
+
+          // ── Divisor ──────────────────────────────────────────
+          const Divider(height: 1),
+
+          // ── Listings ─────────────────────────────────────────
+          Expanded(
+            child: listingsAsync.when(
+              loading: () => const LoadingShimmer(),
+              error: (e, _) => ErrorStateWidget(
+                onRetry: () => ref.read(listingsProvider.notifier).refresh(),
+              ),
+              data: (listings) {
+                if (listings.isEmpty) {
+                  return const EmptyStateWidget(
+                    icon: Icons.search_off_rounded,
+                    title: 'Nenhuma hospedagem encontrada',
+                    subtitle: 'Tente outros filtros ou categorias',
+                  );
+                }
+                return RefreshIndicator(
+                  color: AppColors.coral,
+                  displacement: 20,
+                  onRefresh: () =>
+                      ref.read(listingsProvider.notifier).refresh(),
+                  child: ListView.separated(
+                    controller: _scrollCtrl,
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+                    itemCount: listings.length,
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: AppSpacings.xl),
+                    itemBuilder: (_, i) => ListingCard(
+                      listing: listings[i],
+                      animationIndex: i,
+                      onTap: () =>
+                          context.go('/explore/listing/${listings[i].id}'),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Header ──────────────────────────────────────────────────────────────────
+
+class _Header extends StatelessWidget {
+  final dynamic user;
+  final VoidCallback onFilterTap;
+  final bool hasFilter;
+
+  const _Header({
+    required this.user,
+    required this.onFilterTap,
+    required this.hasFilter,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final top = MediaQuery.of(context).padding.top;
+
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFFFF5A5F), Color(0xFFFF385C)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      padding: EdgeInsets.fromLTRB(20, top + 18, 20, 22),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Greeting row
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Bem-vindo a',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 14,
+                        color: AppColors.white.withValues(alpha: 0.85),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Ubatuba 🌊',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.white,
+                        height: 1.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Avatar
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.white.withValues(alpha: 0.2),
+                  border: Border.all(
+                      color: AppColors.white.withValues(alpha: 0.4), width: 1.5),
+                ),
+                child: const Icon(
+                  Icons.person_outline_rounded,
+                  color: AppColors.white,
+                  size: 22,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 18),
+
+          // Search bar elevado
+          GestureDetector(
+            onTap: () {},
+            child: Container(
+              height: 52,
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.black.withValues(alpha: 0.18),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
               child: Row(
                 children: [
+                  const SizedBox(width: 18),
+                  const Icon(Icons.search_rounded,
+                      color: AppColors.coral, size: 22),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: Container(
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5F5F5),
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 12),
-                          const Icon(Icons.search, color: AppColors.warmGray, size: 20),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Buscar em Ubatuba...',
-                            style: TextStyle(color: AppColors.warmGray, fontSize: 14),
-                          ),
-                        ],
+                    child: Text(
+                      'Para onde você vai?',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 15,
+                        color: AppColors.warmGray,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Stack(
-                    children: [
-                      GestureDetector(
-                        onTap: _showFilters,
-                        child: Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: filter.hasActiveFilters
-                                ? AppColors.coral
-                                : const Color(0xFFF5F5F5),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Icon(
-                            Icons.tune_rounded,
-                            color: filter.hasActiveFilters
-                                ? AppColors.white
-                                : AppColors.charcoal,
-                            size: 22,
-                          ),
-                        ),
+                  // Filter button
+                  GestureDetector(
+                    onTap: onFilterTap,
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 6),
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: hasFilter
+                            ? AppColors.coral
+                            : AppColors.paleGray,
+                        shape: BoxShape.circle,
                       ),
-                      if (filter.hasActiveFilters)
-                        Positioned(
-                          right: 2,
-                          top: 2,
-                          child: Container(
-                            width: 10,
-                            height: 10,
-                            decoration: const BoxDecoration(
-                              color: AppColors.teal,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                    ],
+                      child: Icon(
+                        Icons.tune_rounded,
+                        size: 18,
+                        color: hasFilter
+                            ? AppColors.white
+                            : AppColors.darkGray,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: AppSpacings.sm),
-            // Category tabs
-            CategoryTabBar(
-              selected: _region,
-              onSelected: _setRegion,
-            ),
-            // Listings
-            Expanded(
-              child: listingsAsync.when(
-                loading: () => const LoadingShimmer(),
-                error: (e, _) => ErrorStateWidget(
-                  onRetry: () =>
-                      ref.read(listingsProvider.notifier).refresh(),
-                ),
-                data: (listings) {
-                  if (listings.isEmpty) {
-                    return const EmptyStateWidget(
-                      icon: Icons.search_off_rounded,
-                      title: 'Nenhuma hospedagem encontrada',
-                      subtitle: 'Tente outros filtros ou categorias',
-                    );
-                  }
-                  return RefreshIndicator(
-                    color: AppColors.coral,
-                    onRefresh: () =>
-                        ref.read(listingsProvider.notifier).refresh(),
-                    child: ListView.separated(
-                      controller: _scrollCtrl,
-                      padding: const EdgeInsets.fromLTRB(
-                          AppSpacings.base, AppSpacings.sm,
-                          AppSpacings.base, AppSpacings.xl),
-                      itemCount: listings.length,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: AppSpacings.lg),
-                      itemBuilder: (_, i) => ListingCard(
-                        listing: listings[i],
-                        animationIndex: i,
-                        onTap: () => context.go(
-                            '/explore/listing/${listings[i].id}'),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

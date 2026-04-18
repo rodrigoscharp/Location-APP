@@ -22,8 +22,6 @@ class Conversation {
   });
 
   factory Conversation.fromJson(Map<String, dynamic> json, String currentUserId) {
-    final isGuest = json['guest_id'] == currentUserId;
-
     // Get the "other" person's profile
     final profiles = json['profiles'] as List<dynamic>? ?? [];
     final otherProfile = profiles.firstWhere(

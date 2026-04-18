@@ -26,18 +26,12 @@ class AuthRepository {
     required String password,
     required String fullName,
   }) async {
-    final response = await _client.auth.signUp(
+    // O trigger handle_new_user cria o perfil automaticamente via metadata
+    await _client.auth.signUp(
       email: email,
       password: password,
       data: {'full_name': fullName},
     );
-
-    if (response.user != null) {
-      await _client.from('profiles').upsert({
-        'id': response.user!.id,
-        'full_name': fullName,
-      });
-    }
   }
 
   Future<void> signInWithGoogle() async {

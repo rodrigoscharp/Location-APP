@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class RatingStars extends StatelessWidget {
@@ -18,18 +19,24 @@ class RatingStars extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (rating == null) {
-      return const Text('Novo', style: TextStyle(fontSize: 12, color: AppColors.warmGray));
+      return Text(
+        'Novo',
+        style: GoogleFonts.dmSans(
+          fontSize: size - 1,
+          color: AppColors.warmGray,
+        ),
+      );
     }
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.star_rounded, size: size, color: AppColors.starYellow),
-        const SizedBox(width: 2),
+        Icon(Icons.star_rounded, size: size + 1, color: AppColors.starYellow),
+        const SizedBox(width: 3),
         Text(
           rating!.toStringAsFixed(1),
-          style: TextStyle(
-            fontSize: size - 1,
-            fontWeight: FontWeight.w600,
+          style: GoogleFonts.dmSans(
+            fontSize: size,
+            fontWeight: FontWeight.w700,
             color: AppColors.charcoal,
           ),
         ),
@@ -37,7 +44,10 @@ class RatingStars extends StatelessWidget {
           const SizedBox(width: 2),
           Text(
             '($reviewCount)',
-            style: TextStyle(fontSize: size - 1, color: AppColors.warmGray),
+            style: GoogleFonts.dmSans(
+              fontSize: size - 1,
+              color: AppColors.warmGray,
+            ),
           ),
         ],
       ],
